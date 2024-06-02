@@ -4,7 +4,7 @@ import asyncio
 
 async def collect_events():
     # Choose network
-    client = hypersync.HypersyncClient("https://base.hypersync.xyz")
+    client = hypersync.HypersyncClient(hypersync.ClientConfig("https://base.hypersync.xyz"))
 
     query = hypersync.Query(
         from_block=0,
@@ -15,27 +15,24 @@ async def collect_events():
         # Select the fields and tables we want
         field_selection=FieldSelection(
             log=[
-                LogField.TOPIC0,
-                LogField.TOPIC1,
-                LogField.TOPIC2,
-                LogField.TOPIC3,
-                LogField.DATA,
-                LogField.TRANSACTION_HASH,
+                # Loading only this simple boolean field makes this erquest much faster
+                LogField.REMOVED,
+                # LogField.TOPIC0,
+                # LogField.TOPIC1,
+                # LogField.TOPIC2,
+                # LogField.TOPIC3,
+                # LogField.DATA,
+                # LogField.TRANSACTION_HASH,
             ],
-            transaction=[
-                TransactionField.BLOCK_NUMBER,
-            ]
         ),
     )
 
-    config = hypersync.ParquetConfig(
-        path="data",
-        hex_output=True, 
+    config = hypersync.StreamConfig(
         batch_size=50000,
         concurrency=12,
     )
 
-    await client.create_parquet_folder(query, config)
+    await client.collect_parquet("data",query, config)
 
 
 def main():
