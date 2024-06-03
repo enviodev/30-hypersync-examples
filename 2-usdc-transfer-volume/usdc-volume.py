@@ -30,7 +30,6 @@ async def collect_events():
         ),
     )
 
-    print("parquet config...")
     config = hypersync.StreamConfig(
         hex_output=hypersync.HexOutput.PREFIXED,
         column_mapping=ColumnMapping(
