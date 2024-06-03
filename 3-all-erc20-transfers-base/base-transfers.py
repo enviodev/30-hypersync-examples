@@ -17,12 +17,6 @@ async def collect_events():
             log=[
                 # Loading only this simple boolean field makes this erquest much faster
                 LogField.REMOVED,
-                # LogField.TOPIC0,
-                # LogField.TOPIC1,
-                # LogField.TOPIC2,
-                # LogField.TOPIC3,
-                # LogField.DATA,
-                # LogField.TRANSACTION_HASH,
             ],
         ),
     )
