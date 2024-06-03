@@ -8,6 +8,6 @@ The second script, `calculate-volume.py`, uses Polars to read in the decoded_log
 
 **Getting Started**
 
-- Install `hypersync` and `asyncio` libraries using uv or pip: `uv pip install hypersync asyncio`
+- Install `hypersync` and `asyncio` libraries using uv or pip: `uv pip install -r requirements.txt`
 
 Once installed, simply run each script in turn to see how they work together. The first script will generate a Parquet file containing decoded logs from the USDC contract, while the second script will process that data and print out an estimate of the dollars value.

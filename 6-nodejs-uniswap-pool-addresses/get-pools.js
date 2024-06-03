@@ -20,20 +20,21 @@ let query = {
     },
   ],
   fieldSelection: {
-    block: ["number", "timestamp", "hash"],
+    // block: ["number", "timestamp", "hash"],
     log: [
       "block_number",
-      "log_index",
-      "transaction_index",
-      "transaction_hash",
-      "data",
-      "address",
-      "topic0",
-      "topic1",
-      "topic2",
-      "topic3",
+      // NOTE: No need to include all thees other fields as they don't matterfor the count.
+      // "log_index",
+      // "transaction_index",
+      // "transaction_hash",
+      // "data",
+      // "address",
+      // "topic0",
+      // "topic1",
+      // "topic2",
+      // "topic3",
     ],
-    transaction: ["from"],
+    // transaction: ["from"],
   },
 };
 
@@ -42,8 +43,8 @@ const main = async () => {
   const startTime = performance.now();
 
   // Send an initial non-parallelized request to find first events
-  const res = await client.sendEventsReq(query);
-  eventCount += res.events.length;
+  const res = await client.get(query);
+  eventCount += res.data.logs.length;
   query.fromBlock = res.nextBlock;
 
   // Start streaming events in parallel
@@ -62,17 +63,15 @@ const main = async () => {
       break;
     }
 
-    eventCount += res.events.length;
+    eventCount += res.data.length; // There is one data point per log.
 
     const currentTime = performance.now();
 
     const seconds = (currentTime - startTime) / 1000;
 
     console.log(
-      `scanned up to ${
-        res.nextBlock
-      } and got ${eventCount} events. ${seconds} seconds elapsed. Blocks per second: ${
-        res.nextBlock / seconds
+      `scanned up to ${res.nextBlock
+      } and got ${eventCount} events. ${seconds} seconds elapsed. Blocks per second: ${res.nextBlock / seconds
       }`
     );
   }

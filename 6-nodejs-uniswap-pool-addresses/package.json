@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@envio-dev/hypersync-client": "^0.1.10",
+    "@envio-dev/hypersync-client": "^0.2.2",
     "viem": "^2.9.6"
   },
   "type": "module"

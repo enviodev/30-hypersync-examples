@@ -1,10 +1,10 @@
 import hypersync
-from hypersync import LogSelection, LogField, FieldSelection, TransactionField, ColumnMapping, DataType
+from hypersync import LogSelection, FieldSelection, LogField, TransactionField, DataType, ColumnMapping;
 import asyncio
 
 async def collect_events():
     # Choose network
-    client = hypersync.HypersyncClient("https://eth.hypersync.xyz")
+    client = hypersync.HypersyncClient(hypersync.ClientConfig(url="https://eth.hypersync.xyz"))
 
     query = hypersync.Query(
         from_block=0,
@@ -29,11 +29,8 @@ async def collect_events():
         ),
     )
 
-    config = hypersync.ParquetConfig(
-        path="data",
-        hex_output=True, 
-        batch_size=50000,
-        concurrency=12,
+    config = hypersync.StreamConfig(
+        hex_output=hypersync.HexOutput.PREFIXED,
         column_mapping=ColumnMapping(
             # map value columns to float so we can do calculations with them
             decoded_log={
@@ -43,7 +40,8 @@ async def collect_events():
         event_signature="Transfer(address indexed from, address indexed to, uint256 value)",
     )
 
-    await client.create_parquet_folder(query, config)
+    print("executing query...")
+    await client.collect_parquet("data", query, config)
 
 
 def main():
