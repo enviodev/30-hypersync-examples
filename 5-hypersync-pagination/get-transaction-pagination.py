@@ -8,7 +8,7 @@ walletAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".lower()
 
 async def main():
     # Create hypersync client using the base hypersync endpoint (default)
-    client = hypersync.HypersyncClient("https://polygon.hypersync.xyz")
+    client = hypersync.HypersyncClient(hypersync.ClientConfig(url="https://polygon.hypersync.xyz"))
 
     # Initial block to start the query from
     current_block = 0
@@ -38,7 +38,7 @@ async def main():
         print(f"Starting the query from block {start_block}...")
 
         start_time = time.time()
-        res = await client.send_req(query)
+        res = await client.get(query)
         end_time = time.time()
 
         end_block = res.next_block
