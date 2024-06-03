@@ -6,7 +6,6 @@ async def collect_events():
     # Choose network
     client = hypersync.HypersyncClient(hypersync.ClientConfig(url="https://eth.hypersync.xyz"))
 
-    print("constructing query...")
     query = hypersync.Query(
         from_block=0,
         # Select the logs we want
