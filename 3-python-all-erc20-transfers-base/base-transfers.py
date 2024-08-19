@@ -1,10 +1,16 @@
 import hypersync
 from hypersync import LogSelection, LogField, FieldSelection, TransactionField, ColumnMapping, DataType
 import asyncio
+import os
 
 async def collect_events():
     # Choose network
-    client = hypersync.HypersyncClient(hypersync.ClientConfig("https://base.hypersync.xyz"))
+    bearer_token = os.environ.get("HYPERSYNC_BEARER_TOKEN")
+    if not bearer_token:
+        print("\033[93mPlease create a token at https://envio.dev/app/api-tokens and set the HYPERSYNC_BEARER_TOKEN environment variable. API tokens will improve the reliability of the service, and in future they may become compulsory.\033[0m")
+        bearer_token = "hypersync-examples-repo" # This isn't a real token.
+
+    client = hypersync.HypersyncClient(hypersync.ClientConfig("https://base.hypersync.xyz", bearer_token=bearer_token))
 
     query = hypersync.Query(
         from_block=0,

@@ -2,6 +2,7 @@ import hypersync
 import asyncio
 from hypersync import BlockField, TransactionField, LogField
 import time
+import os
 
 # Just an arbitrary address with some activitiy: https://basescan.org/address/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 walletAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".lower()
@@ -9,7 +10,12 @@ walletAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".lower()
 
 async def main():
     # Create hypersync client using the base hypersync endpoint (default)
-    client = hypersync.HypersyncClient(hypersync.ClientConfig("https://base.hypersync.xyz"))
+    bearer_token = os.environ.get("HYPERSYNC_BEARER_TOKEN")
+    if not bearer_token:
+        print("\033[93mPlease create a token at https://envio.dev/app/api-tokens and set the HYPERSYNC_BEARER_TOKEN environment variable. API tokens will improve the reliability of the service, and in future they may become compulsory.\033[0m")
+        bearer_token = "hypersync-examples-repo" # This isn't a real token.
+
+    client = hypersync.HypersyncClient(hypersync.ClientConfig("https://base.hypersync.xyz", bearer_token=bearer_token))
 
     # The query to run
     query = hypersync.Query(
