@@ -18,8 +18,15 @@ async function main() {
   console.time("Script Execution Time");
 
   // Create hypersync client using the mainnet hypersync endpoint
+  let bearerToken = process.env.HYPERSYNC_BEARER_TOKEN;
+  if (!bearerToken) {
+    console.warn("Please create a token at https://envio.dev/app/api-tokens and set the HYPERSYNC_BEARER_TOKEN environment variable. API tokens will improve the reliability of the service, and in future they may become compulsory.");
+    bearerToken = "hypersync-examples-repo"; // This isn't a real token.
+  }
+
   const client = HypersyncClient.new({
     url: hyperSyncEndpoint,
+    bearerToken: bearerToken,
     maxNumRetries: 0,
   });
 

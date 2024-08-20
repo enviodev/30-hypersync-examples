@@ -5,9 +5,16 @@ import {
 } from "@envio-dev/hypersync-client";
 
 async function main() {
+
+  let bearerToken = process.env.HYPERSYNC_BEARER_TOKEN;
+  if (!bearerToken) {
+    console.warn("Please create a token at https://envio.dev/app/api-tokens and set the HYPERSYNC_BEARER_TOKEN environment variable. API tokens will improve the reliability of the service, and in future they may become compulsory.")
+    bearerToken = "hypersync-examples-repo" // This isn't a real token.
+  }
   // Create hypersync client using the mainnet hypersync endpoint
   const client = HypersyncClient.new({
     url: "https://eth.hypersync.xyz",
+    bearerToken: bearerToken,
   });
 
   const height = await client.getHeight(); // Await the getHeight call
