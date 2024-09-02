@@ -3,13 +3,13 @@ import asyncio
 from hypersync import BlockField, TransactionField, LogField
 import time
 
-# Just an arbitrary address with some activitiy: https://basescan.org/address/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 walletAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".lower()
 
 
 async def main():
     # Create hypersync client using the base hypersync endpoint (default)
-    client = hypersync.HypersyncClient(hypersync.ClientConfig("https://base.hypersync.xyz"))
+    client = hypersync.HypersyncClient(
+        hypersync.ClientConfig("https://eth.hypersync.xyz"))
 
     # The query to run
     query = hypersync.Query(

@@ -1,18 +1,23 @@
 import hypersync
-from hypersync import LogSelection, FieldSelection, LogField, TransactionField, DataType, ColumnMapping;
+from hypersync import LogSelection, FieldSelection, LogField, TransactionField, DataType, ColumnMapping
 import asyncio
+
 
 async def collect_events():
     # Choose network
-    client = hypersync.HypersyncClient(hypersync.ClientConfig(url="https://eth.hypersync.xyz"))
+    client = hypersync.HypersyncClient(
+        hypersync.ClientConfig(url="https://base.hypersync.xyz"))
 
     query = hypersync.Query(
         from_block=0,
         # Select the logs we want
         logs=[LogSelection(
-            address=["0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"], # USDC contract
-            topics=[["0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"]], # Transfer event topic
-        )], 
+            # USDC contract
+            address=["0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"],
+            # Transfer event topic
+            topics=[
+                ["0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"]],
+        )],
         # Select the fields and tables we want
         field_selection=FieldSelection(
             log=[
@@ -46,5 +51,6 @@ async def collect_events():
 
 def main():
     asyncio.run(collect_events())
+
 
 main()

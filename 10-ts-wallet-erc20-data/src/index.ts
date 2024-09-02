@@ -107,6 +107,7 @@ async function main() {
         rawLogData == undefined ||
         rawLogData.address == undefined
       ) {
+        console.log("Invalid log, skipping...");
         continue;
       }
 
