@@ -1,0 +1,9 @@
+[project]
+name = "12-get-block-given-timestamp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "hypersync>=0.8.5",
+]
