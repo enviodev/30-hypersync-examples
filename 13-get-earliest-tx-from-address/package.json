@@ -1,0 +1,15 @@
+{
+  "name": "13-get-earliest-tx-from-address",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@envio-dev/hypersync-client": "^0.6.3"
+  },
+  "type": "module"
+}
