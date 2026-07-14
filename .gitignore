@@ -2,6 +2,7 @@
 **/data/
 **/.venv/
 **/__pycache__/
+**/target/
 *.parquet
 .DS_Store
 .env
