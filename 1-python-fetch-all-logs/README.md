@@ -3,7 +3,7 @@
 **Prerequisites**
 
 - Install `hypersync` and `asyncio` libraries using uv or pip: `uv pip install -r requirements.txt`
-- Replace `"https://eth.hypersync.xyz"` with your desired Hypersync chain URL (see [Hypersync documentation](https://docs.envio.dev/docs/overview-hypersync) for supported chains)
+- Replace `"https://eth.hypersync.xyz"` with your desired Hypersync chain URL (see [Hypersync documentation](https://docs.envio.dev/docs/HyperSync/overview) for supported chains)
 - Update the contract address (`eigenlayer_slasher`) and block range as needed
 
 **Usage**

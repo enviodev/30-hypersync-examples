@@ -5,5 +5,5 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "hypersync>=0.8.5",
+    "hypersync>=1.2.0",
 ]

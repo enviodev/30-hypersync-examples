@@ -1,10 +1,19 @@
-import { HypersyncClient, Decoder } from "@envio-dev/hypersync-client";
+import { HypersyncClient, Decoder, Query } from "@envio-dev/hypersync-client";
 import {
   erc20InThreshold,
   erc20OutThreshold,
   hyperSyncEndpoint,
   targetAddress,
 } from "./config";
+
+const apiToken = process.env.ENVIO_API_TOKEN;
+if (!apiToken) {
+  console.error(
+    "Missing ENVIO_API_TOKEN. Get a token at https://docs.envio.dev/docs/HyperSync/api-tokens and export it before running."
+  );
+  process.exit(1);
+}
+const token: string = apiToken;
 
 // Convert address to topic for filtering. Padds the address with zeroes.
 function addressToTopic(address: string): string {
@@ -18,20 +27,14 @@ async function main() {
   console.time("Script Execution Time");
 
   // Create hypersync client using the mainnet hypersync endpoint
-  let bearerToken = process.env.HYPERSYNC_BEARER_TOKEN;
-  if (!bearerToken) {
-    console.warn("Please create a token at https://envio.dev/app/api-tokens and set the HYPERSYNC_BEARER_TOKEN environment variable. API tokens will improve the reliability of the service, and in future they may become compulsory.");
-    bearerToken = "hypersync-examples-repo"; // This isn't a real token.
-  }
-
-  const client = HypersyncClient.new({
+  const client = new HypersyncClient({
     url: hyperSyncEndpoint,
-    bearerToken: bearerToken,
+    apiToken: token,
     maxNumRetries: 0,
   });
 
   // The query to run
-  const query = {
+  const query: Query = {
     // start from block 0 and go to the end of the chain (we don't specify a toBlock).
     fromBlock: 0,
     // The logs we want. We will also automatically get transactions and blocks relating to these logs (the query implicitly joins them).
@@ -56,10 +59,10 @@ async function main() {
       },
     ],
     transactions: [],
-    // Select the fields we are interested in, notice topics are selected as topic0,1,2,3
+    // Select the fields we are interested in (PascalCase enum names required by client 1.x)
     fieldSelection: {
-      transaction: ["from", "to", "value"],
-      log: ["data", "address", "topic0", "topic1", "topic2"],
+      transaction: ["From", "To", "Value"],
+      log: ["Data", "Address", "Topic0", "Topic1", "Topic2"],
     },
   };
 

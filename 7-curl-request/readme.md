@@ -1,29 +1,28 @@
-Here's a simple README for your Day 7 of the HyperSync Curl examples:
+## Curl + HyperSync
 
-## Curl in HyperSync 🤓
-
-### Overview
-
-We're diving into the power of curl commands to interact with HyperSync's robust API. With just a single command, you can fetch all ERC20 transfers and transactions to and from any specified address.
+Fetch ERC-20 transfers and transactions for an address with a single HTTP request.
 
 ### Prerequisites
 
-- Ensure you have `curl` installed on your terminal. If not, you can install it by visiting [Curl Installation Guide](https://curl.se/download.html).
-
-### Usage Instructions
-
-1. **Prepare the Command:**
-   Modify the command below by replacing the placeholder address with the actual Ethereum address you're interested in.
-
-2. **Execute the Command:**
-   Copy and paste the following command into your terminal:
+- `curl`
+- `ENVIO_API_TOKEN` ([API tokens docs](https://docs.envio.dev/docs/HyperSync/api-tokens))
 
 ```bash
-curl --request POST  \
+export ENVIO_API_TOKEN="your-token-here"
+```
+
+### Usage
+
+Replace the placeholder address in the payload as needed, then run:
+
+```bash
+curl --request POST \
   --url https://base.hypersync.xyz/query \
+  --header "Authorization: Bearer ${ENVIO_API_TOKEN}" \
   --header 'Content-Type: application/json' \
   --data '{
     "from_block": 0,
+    "to_block": 1000000,
     "logs": [
       {
         "topics": [
@@ -58,5 +57,6 @@ curl --request POST  \
 
 ### Tips
 
-- Remember, curl is using JSON https so it won't be as effcient as a binary data transfer using the client directly (but its still really fast).
-- Feel free to adjust the JSON payload to fit different types of blockchain data queries.
+- JSON over HTTPS is less efficient than the binary client transport, but still fast.
+- Prefer a bounded `to_block` while experimenting.
+- Docs: [HyperSync overview](https://docs.envio.dev/docs/HyperSync/overview) · [supported networks](https://docs.envio.dev/docs/HyperSync/hypersync-supported-networks)

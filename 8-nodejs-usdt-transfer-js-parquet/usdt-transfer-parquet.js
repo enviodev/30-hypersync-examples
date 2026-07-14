@@ -4,17 +4,19 @@ import {
   HypersyncClient,
 } from "@envio-dev/hypersync-client";
 
-async function main() {
+const apiToken = process.env.ENVIO_API_TOKEN;
+if (!apiToken) {
+  console.error(
+    "Missing ENVIO_API_TOKEN. Get a token at https://docs.envio.dev/docs/HyperSync/api-tokens and export it before running."
+  );
+  process.exit(1);
+}
 
-  let bearerToken = process.env.HYPERSYNC_BEARER_TOKEN;
-  if (!bearerToken) {
-    console.warn("Please create a token at https://envio.dev/app/api-tokens and set the HYPERSYNC_BEARER_TOKEN environment variable. API tokens will improve the reliability of the service, and in future they may become compulsory.")
-    bearerToken = "hypersync-examples-repo" // This isn't a real token.
-  }
+async function main() {
   // Create hypersync client using the mainnet hypersync endpoint
-  const client = HypersyncClient.new({
+  const client = new HypersyncClient({
     url: "https://eth.hypersync.xyz",
-    bearerToken: bearerToken,
+    apiToken: apiToken,
   });
 
   const height = await client.getHeight(); // Await the getHeight call
@@ -34,16 +36,16 @@ async function main() {
     ],
     fieldSelection: {
       log: [
-        "block_number",
-        "log_index",
-        "transaction_index",
-        "transaction_hash",
-        "data",
-        "address",
-        "topic0",
-        "topic1",
-        "topic2",
-        "topic3",
+        "BlockNumber",
+        "LogIndex",
+        "TransactionIndex",
+        "TransactionHash",
+        "Data",
+        "Address",
+        "Topic0",
+        "Topic1",
+        "Topic2",
+        "Topic3",
       ],
     },
   };
@@ -51,6 +53,9 @@ async function main() {
   console.log(
     "Writing to parquet... This might take some time depending on connection speed"
   );
+
+  // Bound the range for a practical demo (full history can take a long time)
+  query.toBlock = height - 499000;
 
   const startWrite = performance.now(); // Start measuring collectParquet execution time
   await client.collectParquet("data", query, {
