@@ -8,8 +8,6 @@ from hypersync import LogField, LogSelection
 ANSWER_UPDATED = (
     "0x0559884fd3a460db3073b7fc896cc77986f16e378210ded43186175bf646fc5f"
 )
-# Chainlink ETH/USD proxy/aggregator commonly used in examples
-ETH_USD = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 
 
 async def main():
@@ -24,13 +22,20 @@ async def main():
         hypersync.ClientConfig(url="https://eth.hypersync.xyz", bearer_token=api_token)
     )
     height = await client.get_height()
-    from_block = max(0, height - 20_000)
+    from_block = max(0, height - 5_000)
 
+    # Match AnswerUpdated across all aggregators (proxies don't emit this event)
     query = hypersync.Query(
         from_block=from_block,
-        logs=[LogSelection(address=[ETH_USD], topics=[[ANSWER_UPDATED]])],
+        logs=[LogSelection(topics=[[ANSWER_UPDATED]])],
         field_selection=hypersync.FieldSelection(
-            log=[LogField.ADDRESS, LogField.TOPIC0, LogField.TOPIC1, LogField.DATA, LogField.BLOCK_NUMBER]
+            log=[
+                LogField.ADDRESS,
+                LogField.TOPIC0,
+                LogField.TOPIC1,
+                LogField.DATA,
+                LogField.BLOCK_NUMBER,
+            ]
         ),
     )
 
