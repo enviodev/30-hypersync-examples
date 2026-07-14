@@ -8,11 +8,11 @@ jobs:
   syntax:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
       - name: Python syntax
@@ -32,8 +32,8 @@ jobs:
       run:
         working-directory: 10-ts-wallet-erc20-activity
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: npm
@@ -50,6 +50,6 @@ jobs:
           - 19-rs-stream-erc20-transfers
           - 25-rs-contract-deployment-radar
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo check --locked --manifest-path "${{ matrix.example }}/Cargo.toml"
