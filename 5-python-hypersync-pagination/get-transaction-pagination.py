@@ -1,3 +1,4 @@
+import os
 import hypersync
 import asyncio
 from hypersync import TransactionField
@@ -7,8 +8,14 @@ walletAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".lower()
 
 
 async def main():
-    # Create hypersync client using the base hypersync endpoint (default)
-    client = hypersync.HypersyncClient(hypersync.ClientConfig(url="https://polygon.hypersync.xyz"))
+    # Create hypersync client using the polygon hypersync endpoint
+    api_token = os.environ.get("ENVIO_API_TOKEN")
+    if not api_token:
+        raise SystemExit(
+            "Missing ENVIO_API_TOKEN. Get a token at https://docs.envio.dev/docs/HyperSync/api-tokens and export it before running."
+        )
+
+    client = hypersync.HypersyncClient(hypersync.ClientConfig(url="https://polygon.hypersync.xyz", bearer_token=api_token))
 
     # Initial block to start the query from
     current_block = 0

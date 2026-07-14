@@ -1,21 +1,23 @@
 import { keccak256, toHex } from "viem";
 import { HypersyncClient, Decoder } from "@envio-dev/hypersync-client";
 
+
+const apiToken = process.env.ENVIO_API_TOKEN;
+if (!apiToken) {
+  console.error(
+    "Missing ENVIO_API_TOKEN. Get a token at https://docs.envio.dev/docs/HyperSync/api-tokens and export it before running."
+  );
+  process.exit(1);
+}
+
 const event_signatures = ["PoolCreated(address,address,uint24,int24,address)"];
 
 const topic0_list = event_signatures.map((sig) => keccak256(toHex(sig)));
 
 console.log(topic0_list);
-
-let bearerToken = process.env.HYPERSYNC_BEARER_TOKEN;
-if (!bearerToken) {
-  console.warn("Please create a token at https://envio.dev/app/api-tokens and set the HYPERSYNC_BEARER_TOKEN environment variable. API tokens will improve the reliability of the service, and in future they may become compulsory.");
-  bearerToken = "hypersync-examples-repo"; // This isn't a real token.
-}
-
-const client = HypersyncClient.new({
+const client = new HypersyncClient({
   url: "https://eth.hypersync.xyz",
-  bearerToken: bearerToken,
+  apiToken: apiToken,
 });
 
 let query = {
@@ -26,7 +28,7 @@ let query = {
     },
   ],
   fieldSelection: {
-    log: ["block_number"],
+    log: ["BlockNumber"],
   },
 };
 

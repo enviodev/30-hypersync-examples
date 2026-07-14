@@ -48,8 +48,8 @@ This script uses the Hypersync Client to fetch Ethereum event logs related to po
   Create a new instance of the Hypersync client:
 
   ```javascript
-  const client = HypersyncClient.new({
-    url: "http://eth.hypersync.xyz",
+  const client = new HypersyncClient({
+    url: "https://eth.hypersync.xyz",
   });
   ```
 

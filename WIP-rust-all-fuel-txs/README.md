@@ -1,6 +1,22 @@
-# all-fuel-transactions
-HyperFuel query to save all transaction information into parquet locally.
+# WIP: all Fuel transactions (Rust)
 
-Run with `$ cargo run --release` to download all data of all transactions on Fuel as a parquet file.
+> **Status: work in progress / unfinished.** This example is incomplete and may not build or run against current HyperFuel clients. Prefer the official HyperSync / HyperFuel client examples until this is finished.
 
-Transaction data is saved in `data/transaction.parquet`
+Intended goal: HyperFuel query that saves all transaction information into parquet locally.
+
+## Prerequisites
+
+- Rust toolchain
+- `ENVIO_API_TOKEN` ([docs](https://docs.envio.dev/docs/HyperSync/api-tokens))
+
+```bash
+export ENVIO_API_TOKEN="your-token-here"
+```
+
+## Intended usage
+
+```bash
+cargo run --release
+```
+
+Transaction data would be saved under `data/transaction.parquet`.

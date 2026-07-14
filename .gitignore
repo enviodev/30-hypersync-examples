@@ -1,0 +1,8 @@
+**/node_modules/
+**/data/
+**/.venv/
+**/__pycache__/
+*.parquet
+.DS_Store
+.env
+.env.*

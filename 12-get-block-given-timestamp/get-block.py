@@ -7,14 +7,15 @@ import os
 
 async def get_block_at_timestamp(target_timestamp: int) -> int:
     # Create hypersync client using the mainnet hypersync endpoint
-    bearer_token = os.environ.get("HYPERSYNC_BEARER_TOKEN")
-    if not bearer_token:
-        print("\033[93mPlease create a token at https://envio.dev/app/api-tokens and set the HYPERSYNC_BEARER_TOKEN environment variable. API tokens will improve the reliability of the service, and in future they may become compulsory.\033[0m")
-        bearer_token = "hypersync-examples-repo"  # This isn't a real token.
+    api_token = os.environ.get("ENVIO_API_TOKEN")
+    if not api_token:
+        raise SystemExit(
+            "Missing ENVIO_API_TOKEN. Get a token at https://docs.envio.dev/docs/HyperSync/api-tokens and export it before running."
+        )
 
     client = hypersync.HypersyncClient(hypersync.ClientConfig(
         url="https://eth.hypersync.xyz",
-        bearer_token=bearer_token
+        bearer_token=api_token
     ))
 
     # Binary search variables
@@ -29,10 +30,10 @@ async def get_block_at_timestamp(target_timestamp: int) -> int:
         query = hypersync.Query(
             from_block=mid,
             to_block=mid + 1,  # Exclusive upper bound
-            logs=[{}],  # Empty log selection to ensure we get block data
+            include_all_blocks=True,
             field_selection=hypersync.FieldSelection(
-                block=["timestamp"]
-            )
+                block=[hypersync.BlockField.TIMESTAMP]
+            ),
         )
 
         res = await client.get(query)
@@ -41,8 +42,9 @@ async def get_block_at_timestamp(target_timestamp: int) -> int:
             right = mid - 1
             continue
 
-        # Convert hex string to int
-        block_timestamp = int(res.data.blocks[0].timestamp, 16)
+        # Timestamp may be returned as hex string or int depending on client version
+        raw_ts = res.data.blocks[0].timestamp
+        block_timestamp = int(raw_ts, 16) if isinstance(raw_ts, str) else int(raw_ts)
 
         # Calculate the difference from our target
         diff = abs(block_timestamp - target_timestamp)

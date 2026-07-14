@@ -4,6 +4,14 @@ import {
   TransactionField,
 } from "@envio-dev/hypersync-client";
 
+const apiToken = process.env.ENVIO_API_TOKEN;
+if (!apiToken) {
+  console.error(
+    "Missing ENVIO_API_TOKEN. Get a token at https://docs.envio.dev/docs/HyperSync/api-tokens and export it before running."
+  );
+  process.exit(1);
+}
+
 // Replace with the wallet address you want to check
 const TARGET_ADDRESS = "0xBEa9f7FD27f4EE20066F18DEF0bc586eC221055A";
 
@@ -55,8 +63,9 @@ async function queryChain(chain) {
     console.log(`Querying ${chain.displayName}...`);
 
     // Initialize client for this chain
-    const client = HypersyncClient.new({
+    const client = new HypersyncClient({
       url: chain.url,
+      apiToken: apiToken,
     });
 
     // Create query

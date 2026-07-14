@@ -6,9 +6,11 @@ use url::Url;
 
 #[tokio::main]
 async fn main() {
+    // WIP: requires ENVIO_API_TOKEN (https://docs.envio.dev/docs/HyperSync/api-tokens)
+    let bearer_token = std::env::var("ENVIO_API_TOKEN").ok();
     let client_config = Config {
         url: Url::parse("https://fuel-testnet.hypersync.xyz").unwrap(),
-        bearer_token: None,
+        bearer_token,
         http_req_timeout_millis: NonZeroU64::new(30000).unwrap(),
     };
     let client = Client::new(client_config).unwrap();
