@@ -1,0 +1,10 @@
+{
+  "name": "29-js-stream-multi-wallet-erc20",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@envio-dev/hypersync-client": "^1.4.0",
+    "viem": "^2.9.6"
+  }
+}

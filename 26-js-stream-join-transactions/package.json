@@ -1,0 +1,10 @@
+{
+  "name": "26-js-stream-join-transactions",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@envio-dev/hypersync-client": "^1.4.0",
+    "viem": "^2.9.6"
+  }
+}
