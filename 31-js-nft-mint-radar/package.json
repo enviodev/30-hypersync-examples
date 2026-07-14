@@ -1,0 +1,16 @@
+{
+  "name": "31-js-nft-mint-radar",
+  "version": "1.0.0",
+  "description": "Find recent ERC-721 mint events with HyperSync",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "check": "node --check main.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@envio-dev/hypersync-client": "^1.4.0"
+  },
+  "type": "module"
+}

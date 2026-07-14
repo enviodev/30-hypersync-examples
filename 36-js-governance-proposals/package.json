@@ -1,0 +1,17 @@
+{
+  "name": "36-js-governance-proposals",
+  "version": "1.0.0",
+  "description": "Discover OpenZeppelin Governor proposals with HyperSync",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "check": "node --check main.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@envio-dev/hypersync-client": "^1.4.0",
+    "viem": "^2.9.6"
+  },
+  "type": "module"
+}

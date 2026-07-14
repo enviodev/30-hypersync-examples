@@ -1,17 +1,22 @@
-### Running this Python script will query the Hypersync API to retrieve all logs from a specific contract within a specified block range.
+# 01 — Paginate contract logs with a preset (Python)
 
-**Prerequisites**
+Retrieve every log for one contract over a bounded range using `preset_query_logs` and `next_block`.
 
-- Install `hypersync` and `asyncio` libraries using uv or pip: `uv pip install -r requirements.txt`
-- Replace `"https://eth.hypersync.xyz"` with your desired Hypersync chain URL (see [Hypersync documentation](https://docs.envio.dev/docs/HyperSync/overview) for supported chains)
-- Update the contract address (`eigenlayer_slasher`) and block range as needed
+**Concepts:** preset queries, exclusive ranges, manual pagination.
 
-**Usage**
+```bash
+pip install -r requirements.txt
+export ENVIO_API_TOKEN=...
+python fetch-logs.py
+```
 
-1. Copy-paste this script into a new Python file.
-2. Run the script using `python filename.py`
-3. Or simply run this script using `python fetch-logs.py`
+Expected shape:
 
-This will execute the query, print progress updates, and display the number of logs retrieved from the specified contract.
+```text
+page=1 range=[0, 19670000) logs=... total=...
+Done. Retrieved ... logs ...
+```
 
-Enjoy!
+Try another `CONTRACT_ADDRESS`, `FROM_BLOCK`, `TO_BLOCK`, or `HYPERSYNC_URL`.
+
+Production note: `get()` returns one page. Continue from `next_block`; a zero-match page is not a reliable completion signal.

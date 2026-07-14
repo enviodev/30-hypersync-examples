@@ -1,18 +1,17 @@
-### Running this Python script will query the Hypersync API to retrieve all transactions to and from a specific wallet address, with pagination to handle large data sets.
+# 05 — Manual wallet pagination (Python)
 
-**Prerequisites**
+Walk a transaction query page by page until the snapshot height, including pages with no matching transactions.
 
-- Install dependencies using use: `uv pip install -r requirements.txt`
-- Install `hypersync` and `asyncio` libraries using pip: `pip install hypersync asyncio`
-- Replace `"https://eth.hypersync.xyz"` with your desired Hypersync chain URL (see [Hypersync documentation](https://docs.envio.dev/docs/HyperSync/overview) for supported chains)
-- Update the wallet address (`walletAddress`) as needed
+**Concepts:** `get()`, `next_block`, progress guards, fixed snapshots.
 
-**Usage**
+```bash
+pip install -r requirements.txt
+export ENVIO_API_TOKEN=...
+python get-transaction-pagination.py
+```
 
-1. Simply run this script using `python fetch-transactions.py`
+Expected output prints each scanned range, matches in that page, elapsed time, and running total.
 
-This will execute the query, paginate through the results, print progress updates, and display the number of transactions retrieved to and from the specified wallet address.
+Try `WALLET_ADDRESS`, `HYPERSYNC_URL`, or `FROM_BLOCK`.
 
-Note: This script uses pagination for ilistrative purposes. Typically the 'Streaming' API is recommended for large data sets as it is more efficient.
-
-Enjoy!
+Production note: completion is `next_block >= snapshot_height`, not “the page contained no matches.” Prefer `stream()` when you do not need to manage pages yourself.

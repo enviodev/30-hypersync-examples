@@ -12,14 +12,17 @@ async def main():
             "Missing ENVIO_API_TOKEN. https://docs.envio.dev/docs/HyperSync/api-tokens"
         )
 
-    max_batches = int(os.environ.get("MAX_BATCHES", "5"))
     client = hypersync.HypersyncClient(
-        hypersync.ClientConfig(url="https://eth.hypersync.xyz", bearer_token=api_token)
+        hypersync.ClientConfig(
+            url=os.environ.get("HYPERSYNC_URL", "https://eth.hypersync.xyz"),
+            bearer_token=api_token,
+        )
     )
 
     height = await client.get_height()
-    from_block = max(0, height - 100)
-    query = hypersync.preset_query_blocks_and_transactions(from_block, height)
+    safe_height = max(0, height - int(os.environ.get("CONFIRMATIONS", "12")))
+    from_block = max(0, safe_height - int(os.environ.get("BLOCK_WINDOW", "5000")))
+    query = hypersync.preset_query_blocks_and_transactions(from_block, safe_height)
 
     # Tune streaming — keep values modest for a local demo
     config = hypersync.StreamConfig(
@@ -28,13 +31,24 @@ async def main():
         max_batch_size=50,
     )
 
+    default_result = await benchmark(client, query, hypersync.StreamConfig())
+    tuned_result = await benchmark(client, query, config)
+
+    print("\nconfiguration   seconds   blocks   txs   blocks/sec   txs/sec")
+    for name, result in (("default", default_result), ("tuned", tuned_result)):
+        seconds, blocks, txs = result
+        print(
+            f"{name:<15} {seconds:>7.2f} {blocks:>8} {txs:>7} "
+            f"{blocks / seconds:>12.1f} {txs / seconds:>9.1f}"
+        )
+
+
+async def benchmark(client, query, config):
     receiver = await client.stream(query, config)
-    start = time.time()
-    batches = 0
+    started = time.perf_counter()
     blocks = 0
     txs = 0
-
-    while batches < max_batches:
+    while True:
         res = await receiver.recv()
         if res is None:
             break
@@ -42,13 +56,7 @@ async def main():
         t = len(res.data.transactions) if res.data and res.data.transactions else 0
         blocks += b
         txs += t
-        batches += 1
-        print(
-            f"batch={batches} next_block={res.next_block} blocks={b} txs={t} "
-            f"elapsed={time.time() - start:.2f}s"
-        )
-
-    print(f"Done. blocks={blocks} txs={txs}")
+    return time.perf_counter() - started, blocks, txs
 
 
 asyncio.run(main())

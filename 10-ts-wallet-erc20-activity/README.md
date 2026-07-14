@@ -1,36 +1,17 @@
-# address-transactions
+# 10 — Native and ERC-20 wallet statement (TypeScript)
 
-This is a project for getting all the fungible (native asset and ERC20 token) transfers from an EVM blockchain for a given address.
+Build a confirmed wallet activity statement containing direct native transfers and ERC-20 transfers grouped by token contract.
 
-## Getting Started
+**Concepts:** mixed transaction/log selections, `JoinNothing`, decoding, directional aggregation.
 
-### Installation
-
-To run the project, first install the packages with:
-
-```sh
-pnpm install
+```bash
+npm install
+export ENVIO_API_TOKEN=...
+npm start -- 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 ```
 
-### Usage
+Expected output includes native ETH in/out counts and values plus raw ERC-20 in/out/net values per token contract.
 
-To start the script, use the following command, replacing `<your address>` with the Ethereum address you want to analyze:
+Adjust `erc20InThreshold` and `erc20OutThreshold` in `src/config.ts`, or set `FROM_BLOCK`, `CONFIRMATIONS`, or `HYPERSYNC_URL`.
 
-```sh
-pnpm start <your address>
-```
-
-## Functionality
-
-The script scans the entire Ethereum blockchain (from block 0 to the present) and retrieves all relevant transactions for the given address. It iterates through these transactions and sums up their values to calculate aggregates for each token.
-
-## Configuration
-
-Since there are many spam ERC20 tokens, we added a configuration file (`config.ts`) that allows you to filter the printed terminal output. By default, it only shows ERC20 tokens that have either more than 3 transfers in or more than 3 transfers out.
-
-You can adjust the `erc20InThreshold` and `erc20OutThreshold` values thresholds in `config.ts`.
-
-You can also query other supported EVM networks by updating the `hyperSyncEndpoint` variable with another [network endpoint](https://docs.envio.dev/docs/HyperSync/hypersync-supported-networks).
-
-
-
+Production note: ERC-20 values are deliberately labelled raw units because token decimals differ. Enrich token metadata via a trusted token list or contract calls before displaying human units.

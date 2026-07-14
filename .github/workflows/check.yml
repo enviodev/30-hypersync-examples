@@ -1,0 +1,55 @@
+name: examples-check
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Python syntax
+        run: python -m compileall -q .
+      - name: JavaScript syntax
+        run: find . -name '*.js' -not -path '*/node_modules/*' -exec node --check {} \;
+      - name: Shell syntax
+        run: find . -name '*.sh' -exec bash -n {} \;
+      - name: Repository shape
+        run: |
+          test "$(find . -maxdepth 1 -type d -regex './[0-9][0-9]-.*' | wc -l)" -eq 40
+          test "$(find . -maxdepth 2 -type f -path './[0-9][0-9]-*/README.md' | wc -l)" -eq 40
+
+  typescript:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 10-ts-wallet-erc20-activity
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: 10-ts-wallet-erc20-activity/package-lock.json
+      - run: npm ci
+      - run: npm run check
+
+  rust:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        example:
+          - 15-rs-stream-wallet
+          - 19-rs-stream-erc20-transfers
+          - 25-rs-contract-deployment-radar
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo check --locked --manifest-path "${{ matrix.example }}/Cargo.toml"

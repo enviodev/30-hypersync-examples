@@ -1,4 +1,4 @@
-import { HypersyncClient } from "@envio-dev/hypersync-client";
+import { Decoder, HypersyncClient } from "@envio-dev/hypersync-client";
 
 const apiToken = process.env.ENVIO_API_TOKEN;
 if (!apiToken) {
@@ -20,13 +20,15 @@ const toTopic = (addr) =>
 const walletTopics = wallets.map(toTopic);
 
 const client = new HypersyncClient({
-  url: "https://eth.hypersync.xyz",
+  url: process.env.HYPERSYNC_URL || "https://eth.hypersync.xyz",
   apiToken,
 });
 
 const height = await client.getHeight();
-let query = {
-  fromBlock: Math.max(0, height - 5_000),
+const safeHeight = Math.max(0, height - Number(process.env.CONFIRMATIONS || 12));
+const query = {
+  fromBlock: Math.max(0, safeHeight - 5_000),
+  toBlock: safeHeight,
   // OR across selections: transfers FROM wallets OR transfers TO wallets
   logs: [
     { topics: [[TRANSFER], walletTopics] },
@@ -38,16 +40,33 @@ let query = {
 };
 
 const stream = await client.stream(query, {});
+const decoder = Decoder.fromSignatures([
+  "Transfer(address indexed from, address indexed to, uint256 value)",
+]);
+const normalizedWallets = new Set(wallets.map((wallet) => wallet.toLowerCase()));
+const activity = Object.fromEntries(
+  [...normalizedWallets].map((wallet) => [wallet, { in: 0, out: 0 }])
+);
 let batches = 0;
 let total = 0;
 while (batches < MAX_BATCHES) {
   const res = await stream.recv();
   if (res === null) break;
   const n = res.data?.logs?.length ?? 0;
+  const decoded = await decoder.decodeLogs(res.data?.logs ?? []);
+  for (const event of decoded) {
+    if (!event) continue;
+    const from = event.indexed[0]?.val?.toString().toLowerCase();
+    const to = event.indexed[1]?.val?.toString().toLowerCase();
+    if (normalizedWallets.has(from)) activity[from].out += 1;
+    if (normalizedWallets.has(to)) activity[to].in += 1;
+  }
   total += n;
   batches += 1;
   console.log(`batch=${batches} nextBlock=${res.nextBlock} logs=${n} total=${total}`);
-  query.fromBlock = res.nextBlock;
 }
 await stream.close?.();
+console.table(
+  Object.entries(activity).map(([wallet, counts]) => ({ wallet, ...counts }))
+);
 console.log(`Done. total=${total}`);

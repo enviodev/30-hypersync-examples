@@ -1,23 +1,11 @@
 import hypersync
 import asyncio
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
 
-async def get_block_at_timestamp(target_timestamp: int) -> int:
-    # Create hypersync client using the mainnet hypersync endpoint
-    api_token = os.environ.get("ENVIO_API_TOKEN")
-    if not api_token:
-        raise SystemExit(
-            "Missing ENVIO_API_TOKEN. Get a token at https://docs.envio.dev/docs/HyperSync/api-tokens and export it before running."
-        )
-
-    client = hypersync.HypersyncClient(hypersync.ClientConfig(
-        url="https://eth.hypersync.xyz",
-        bearer_token=api_token
-    ))
-
+async def get_block_at_timestamp(client, target_timestamp: int) -> int:
     # Binary search variables
     left = 0
     right = await client.get_height()
@@ -60,20 +48,35 @@ async def get_block_at_timestamp(target_timestamp: int) -> int:
         else:
             right = mid - 1
 
-        print(f"Checking block {mid}, timestamp: {
-              datetime.fromtimestamp(block_timestamp)}")
+        checked_at = datetime.fromtimestamp(block_timestamp, tz=timezone.utc)
+        print(f"Checking block {mid:,}: {checked_at.isoformat()}")
 
     return closest_block
 
 
 async def main():
-    # Example: Find block at January 1, 2024 00:00:00 UTC
-    target_timestamp = int(datetime(2024, 1, 1).timestamp())
+    api_token = os.environ.get("ENVIO_API_TOKEN")
+    if not api_token:
+        raise SystemExit(
+            "Missing ENVIO_API_TOKEN. Get a token at https://docs.envio.dev/docs/HyperSync/api-tokens and export it before running."
+        )
+    client = hypersync.HypersyncClient(
+        hypersync.ClientConfig(
+            url=os.environ.get("HYPERSYNC_URL", "https://eth.hypersync.xyz"),
+            bearer_token=api_token,
+        )
+    )
 
-    print(f"Searching for block at timestamp: {
-          datetime.fromtimestamp(target_timestamp)}")
-    block = await get_block_at_timestamp(target_timestamp)
-    print(f"Found closest block: {block}")
+    target_iso = os.environ.get("TARGET_TIME", "2024-01-01T00:00:00+00:00")
+    target = datetime.fromisoformat(target_iso.replace("Z", "+00:00"))
+    if target.tzinfo is None:
+        target = target.replace(tzinfo=timezone.utc)
+    target_timestamp = int(target.timestamp())
+
+    print(f"Searching for block closest to {target.astimezone(timezone.utc).isoformat()}")
+    started = time.perf_counter()
+    block = await get_block_at_timestamp(client, target_timestamp)
+    print(f"Found block {block:,} in {time.perf_counter() - started:.2f}s")
 
 if __name__ == "__main__":
     asyncio.run(main())

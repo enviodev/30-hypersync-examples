@@ -13,18 +13,17 @@ async fn main() -> Result<()> {
         .and_then(|v| v.parse().ok())
         .unwrap_or(3);
 
-    let client = Client::builder()
-        .chain_id(1)
-        .api_token(api_token)
-        .build()?;
+    let client = Client::builder().chain_id(1).api_token(api_token).build()?;
 
     let usdt = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
     let transfer = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
     let height = client.get_height().await?;
-    let from_block = height.saturating_sub(1_000);
+    let safe_height = height.saturating_sub(12);
+    let from_block = safe_height.saturating_sub(1_000);
 
     let query = Query::new()
         .from_block(from_block)
+        .to_block_excl(safe_height)
         .where_logs(
             LogFilter::all()
                 .and_address([usdt])?
@@ -46,7 +45,7 @@ async fn main() -> Result<()> {
     while batches < max_batches {
         match receiver.recv().await {
             Some(Ok(res)) => {
-                let n = res.data.logs.len();
+                let n: usize = res.data.logs.iter().map(Vec::len).sum();
                 total += n;
                 println!(
                     "batch={} next_block={} logs={} total={}",

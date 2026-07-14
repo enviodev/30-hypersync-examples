@@ -1,22 +1,19 @@
-### Hypersync Client Script for Ethereum Event Logs
+# 08 — USDT Parquet pipeline (JavaScript + Polars)
 
-This script uses the Hypersync Client to fetch Ethereum transfer events from USDT in a certain block range and store decoded values to parquet.
+Collect decoded USDT transfers with the Node client, then rank senders by exact transfer volume in Python.
 
-It may be useful to use a parquet file viewing tool such as the vscode plugin
+**Concepts:** `collectParquet`, decoded columns, cross-language analytics, integer precision.
 
-#### Prerequisites
+```bash
+npm install
+python -m pip install polars
+export ENVIO_API_TOKEN=...
+npm start
+python data-vis.py
+```
 
-- Node.js installed on your machine
+Expected output is a Polars table of top senders with transfer count, raw integer volume, and USDT volume.
 
-#### Installation and Usage
+Try changing the 1,000-block window or grouping by `to` instead of `from`.
 
-1. **Install necessary dependencies:**
-
-   ```sh
-   npm install
-   ```
-
-2. **Run the script:**
-   ```sh
-   node usdt-transfer-parquet.js
-   ```
+Generated `data/` is ignored by Git.

@@ -1,10 +1,12 @@
 {
-  "name": "all-uni",
+  "name": "08-js-collect-usdt-parquet",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "private": true,
+  "main": "usdt-transfer-parquet.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node usdt-transfer-parquet.js",
+    "check": "node --check usdt-transfer-parquet.js"
   },
   "keywords": [],
   "author": "",

@@ -7,3 +7,6 @@
 .DS_Store
 .env
 .env.*
+.checkpoint.json
+*.tmp
+coverage/

@@ -1,0 +1,17 @@
+{
+  "name": "33-js-account-abstraction-ops",
+  "version": "1.0.0",
+  "description": "Analyze ERC-4337 UserOperation events with HyperSync",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "check": "node --check main.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@envio-dev/hypersync-client": "^1.4.0",
+    "viem": "^2.9.6"
+  },
+  "type": "module"
+}

@@ -10,13 +10,15 @@ const MAX_RESULTS = Number(process.env.MAX_RESULTS || 10);
 const THRESHOLD_WEI = 10n ** 15n; // 0.001 ETH
 
 const client = new HypersyncClient({
-  url: "https://eth-traces.hypersync.xyz",
+  url: process.env.HYPERSYNC_URL || "https://eth-traces.hypersync.xyz",
   apiToken,
 });
 
 const height = await client.getHeight();
-let query = {
-  fromBlock: Math.max(0, height - 50),
+const safeHeight = Math.max(0, height - Number(process.env.CONFIRMATIONS || 12));
+const query = {
+  fromBlock: Math.max(0, safeHeight - 50),
+  toBlock: safeHeight,
   traces: [
     {
       // call traces only; filter value client-side for clarity
@@ -24,7 +26,16 @@ let query = {
     },
   ],
   fieldSelection: {
-    trace: ["From", "To", "Value", "CallType", "BlockNumber", "TransactionHash"],
+    trace: [
+      "From",
+      "To",
+      "Value",
+      "CallType",
+      "BlockNumber",
+      "TransactionHash",
+      "TraceAddress",
+      "Error",
+    ],
   },
 };
 
@@ -42,14 +53,24 @@ outer: while (results.length < MAX_RESULTS) {
       from: t.from,
       to: t.to,
       valueWei: value.toString(),
+      valueEth: formatEther(value),
       tx: t.transactionHash,
       block: t.blockNumber,
+      depth: t.traceAddress?.length ?? 0,
+      error: t.error ?? null,
     });
     if (results.length >= MAX_RESULTS) break outer;
   }
-  query.fromBlock = res.nextBlock;
 }
 
 await stream.close?.();
 console.table(results);
 console.log(`Done. found=${results.length}`);
+
+function formatEther(value) {
+  const scale = 10n ** 18n;
+  return `${value / scale}.${(value % scale)
+    .toString()
+    .padStart(18, "0")
+    .slice(0, 6)}`;
+}

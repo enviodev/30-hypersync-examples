@@ -1,21 +1,17 @@
-### Hypersync Client Script for Ethereum Event Logs
+# 09 — zkSync commit-to-verification latency (JavaScript)
 
-This script uses the Hypersync Client to fetch Ethereum event logs related to ZkSync block verifrications posted on mainnet.
-See https://etherscan.io/address/0xabea9132b05a70803a4e85094fd0e1800777fbef
+Decode the legacy zkSync rollup contract's Ethereum L1 `BlockCommit` and `BlockVerification` events, pair them by zkSync block number, and estimate latency in L1 blocks.
 
-#### Prerequisites
+**Concepts:** multiple event signatures, address scoping, event correlation.
 
-- Node.js installed on your machine
+```bash
+npm install
+export ENVIO_API_TOKEN=...
+npm start
+```
 
-#### Installation and Usage
+Expected output shows scan progress followed by paired event count and average L1 blocks to verification.
 
-1. **Install necessary dependencies:**
+Try `FROM_BLOCK`, `TO_BLOCK`, `CONFIRMATIONS`, or another contract/event pair. The default historical window is intentionally small but contains both event types.
 
-   ```sh
-   npm install
-   ```
-
-2. **Run the script:**
-   ```sh
-   node block-verifications.js
-   ```
+This is historical protocol analysis of the legacy zkSync contract, not a current zkSync operational monitor.

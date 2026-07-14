@@ -6,20 +6,20 @@ if (!apiToken) {
   process.exit(1);
 }
 
-const MAX_BATCHES = Number(process.env.MAX_BATCHES || 3);
 const USDC = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 const TRANSFER =
   "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
 const client = new HypersyncClient({
-  url: "https://eth.hypersync.xyz",
+  url: process.env.HYPERSYNC_URL || "https://eth.hypersync.xyz",
   apiToken,
 });
 
 const height = await client.getHeight();
-let query = {
-  fromBlock: Math.max(0, height - 800),
-  joinMode: JoinMode.JoinTransactions,
+const safeHeight = Math.max(0, height - Number(process.env.CONFIRMATIONS || 12));
+const baseQuery = {
+  fromBlock: Math.max(0, safeHeight - 200),
+  toBlock: safeHeight,
   logs: [{ address: [USDC], topics: [[TRANSFER]] }],
   fieldSelection: {
     log: ["Address", "Topic0", "TransactionHash", "BlockNumber"],
@@ -27,18 +27,40 @@ let query = {
   },
 };
 
-const stream = await client.stream(query, {});
-let batches = 0;
-while (batches < MAX_BATCHES) {
-  const res = await stream.recv();
-  if (res === null) break;
-  console.log(
-    `batch=${batches + 1} logs=${res.data?.logs?.length ?? 0} txs=${
-      res.data?.transactions?.length ?? 0
-    } nextBlock=${res.nextBlock}`
-  );
-  batches += 1;
-  query.fromBlock = res.nextBlock;
-}
-await stream.close?.();
-console.log("Done");
+const withoutJoin = await client.collect(
+  { ...baseQuery, joinMode: JoinMode.JoinNothing },
+  {}
+);
+const withTransactions = await client.collect(
+  { ...baseQuery, joinMode: JoinMode.Default },
+  {}
+);
+
+console.table([
+  {
+    mode: "JoinNothing",
+    logs: withoutJoin.data.logs.length,
+    transactions: withoutJoin.data.transactions.length,
+  },
+  {
+    mode: "Default (logs → transactions)",
+    logs: withTransactions.data.logs.length,
+    transactions: withTransactions.data.transactions.length,
+  },
+]);
+
+const transactionsByHash = new Map(
+  withTransactions.data.transactions.map((tx) => [tx.hash, tx])
+);
+console.table(
+  withTransactions.data.logs.slice(0, 5).map((log) => {
+    const tx = transactionsByHash.get(log.transactionHash);
+    return {
+      block: log.blockNumber,
+      transactionHash: log.transactionHash,
+      from: tx?.from,
+      to: tx?.to,
+      nativeValueWei: tx?.value?.toString(),
+    };
+  })
+);

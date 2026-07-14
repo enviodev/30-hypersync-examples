@@ -2,8 +2,12 @@
 
 Stream Approval logs for USDT and print a sample.
 
+**Concepts:** approval topics, `Decoder`, 6-decimal token formatting.
+
 ```bash
 export ENVIO_API_TOKEN=...
 npm install
-node main.js
+npm start
 ```
+
+Expected output shows owner, spender, and USDT allowance. Try `MAX_EVENTS` or another token with matching decimals.

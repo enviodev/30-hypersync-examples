@@ -1,25 +1,19 @@
 import polars as pl
 
+
 def main():
-     # Read the parquet file
+    # Keep token values as integers until presentation to avoid precision loss.
     df = pl.read_parquet("data/decoded_logs.parquet")
-
-     # Calculate the sum of the "value" column
-    total_value = df["value"].sum()
-
-     # Divide 10^6 to get the value in dollars
-    dollars_value = total_value / 10**6
-
-     # Get the number of entries (rows) in the Parquet file
+    total_raw = int(df["value"].sum() or 0)
     num_entries = len(df)
-
-     # Calculate average USD/C value per transfer
-    avg_usdc_per_transfer = dollars_value / num_entries
+    total_usdc = total_raw / 10**6
+    average_usdc = total_usdc / num_entries if num_entries else 0
 
     print(f"The decoded logs parquet file contains {num_entries} entries.")
-    print(f"The sum of all 'value' column values is: {total_value}")
-    print(f"Converting this to dollars, we get: {dollars_value}")
-    print(f"Avg USDC value per transfer: {avg_usdc_per_transfer}")
+    print(f"Raw integer total: {total_raw}")
+    print(f"USDC transferred: {total_usdc:,.2f}")
+    print(f"Average USDC per transfer: {average_usdc:,.2f}")
+
 
 if __name__ == "__main__":
     main()

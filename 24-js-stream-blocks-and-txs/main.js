@@ -1,7 +1,4 @@
-import {
-  HypersyncClient,
-  presetQueryBlocksAndTransactions,
-} from "@envio-dev/hypersync-client";
+import { HypersyncClient } from "@envio-dev/hypersync-client";
 
 const apiToken = process.env.ENVIO_API_TOKEN;
 if (!apiToken) {
@@ -9,34 +6,44 @@ if (!apiToken) {
   process.exit(1);
 }
 
-const MAX_BATCHES = Number(process.env.MAX_BATCHES || 5);
 const client = new HypersyncClient({
-  url: "https://eth.hypersync.xyz",
+  url: process.env.HYPERSYNC_URL || "https://eth.hypersync.xyz",
   apiToken,
 });
 
 const height = await client.getHeight();
-const fromBlock = Math.max(0, height - 30);
-let query = presetQueryBlocksAndTransactions(fromBlock, height);
+const safeHeight = Math.max(0, height - Number(process.env.CONFIRMATIONS || 12));
+const query = {
+  fromBlock: Math.max(0, safeHeight - Number(process.env.BLOCKS || 20)),
+  toBlock: safeHeight,
+  includeAllBlocks: true,
+  // An empty selection object means “all transactions in this block range.”
+  transactions: [{}],
+  fieldSelection: {
+    block: ["Number", "Timestamp", "GasUsed", "BaseFeePerGas"],
+    transaction: ["Hash", "BlockNumber", "From", "GasUsed", "EffectiveGasPrice"],
+  },
+};
 
-const stream = await client.stream(query, {});
-let batches = 0;
-let blocks = 0;
-let txs = 0;
-
-while (batches < MAX_BATCHES) {
-  const res = await stream.recv();
-  if (res === null) break;
-  const b = res.data?.blocks?.length ?? 0;
-  const t = res.data?.transactions?.length ?? 0;
-  blocks += b;
-  txs += t;
-  batches += 1;
-  console.log(
-    `batch=${batches} nextBlock=${res.nextBlock} blocks=${b} txs=${t}`
+const res = await client.collect(query, {});
+const transactionCounts = new Map();
+for (const tx of res.data.transactions) {
+  transactionCounts.set(
+    tx.blockNumber,
+    (transactionCounts.get(tx.blockNumber) || 0) + 1
   );
-  query = { ...query, fromBlock: res.nextBlock };
 }
 
-await stream.close?.();
-console.log(`Done. blocks=${blocks} txs=${txs}`);
+console.table(
+  res.data.blocks.map((block) => ({
+    block: block.number,
+    time: new Date(block.timestamp * 1000).toISOString(),
+    transactions: transactionCounts.get(block.number) || 0,
+    gasUsed: block.gasUsed?.toString(),
+    baseFeeGwei:
+      block.baseFeePerGas == null
+        ? null
+        : (Number(block.baseFeePerGas) / 1e9).toFixed(3),
+  }))
+);
+console.log(`Done. blocks=${res.data.blocks.length} txs=${res.data.transactions.length}`);

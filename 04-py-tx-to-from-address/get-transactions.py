@@ -1,35 +1,46 @@
-import hypersync
 import asyncio
-from hypersync import BlockField, TransactionField, LogField
-import time
 import os
+import time
 
-# Just an arbitrary address with some activitiy: https://basescan.org/address/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
-walletAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".lower()
+import hypersync
+from hypersync import TransactionField
+
+WALLET_ADDRESS = os.environ.get(
+    "WALLET_ADDRESS", "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+).lower()
 
 
 async def main():
-    # Create hypersync client using the base hypersync endpoint (default)
     api_token = os.environ.get("ENVIO_API_TOKEN")
     if not api_token:
         raise SystemExit(
             "Missing ENVIO_API_TOKEN. Get a token at https://docs.envio.dev/docs/HyperSync/api-tokens and export it before running."
         )
 
-    client = hypersync.HypersyncClient(hypersync.ClientConfig(url="https://base.hypersync.xyz", bearer_token=api_token))
+    client = hypersync.HypersyncClient(
+        hypersync.ClientConfig(
+            url=os.environ.get("HYPERSYNC_URL", "https://base.hypersync.xyz"),
+            bearer_token=api_token,
+        )
+    )
+    height = await client.get_height()
+    confirmations = int(os.environ.get("CONFIRMATIONS", "12"))
+    to_block = max(0, height - confirmations)
 
     # The query to run
     query = hypersync.Query(
-        from_block=0,
+        from_block=int(os.environ.get("FROM_BLOCK", "0")),
+        to_block=to_block,
         logs=[],
         transactions=[
             # get all transactions coming from and going to any of our addresses.
-            hypersync.TransactionSelection(from_=[walletAddress]),
-            hypersync.TransactionSelection(to=[walletAddress]),
+            hypersync.TransactionSelection(from_=[WALLET_ADDRESS]),
+            hypersync.TransactionSelection(to=[WALLET_ADDRESS]),
         ],
         field_selection=hypersync.FieldSelection(
             transaction=[
                 TransactionField.HASH,
+                TransactionField.BLOCK_NUMBER,
                 TransactionField.FROM,
                 TransactionField.TO,
                 TransactionField.VALUE,
@@ -38,22 +49,24 @@ async def main():
         )
     )
 
-    start_block = query.from_block
-    print(f"Starting the query from block {start_block}...")
+    print(f"Scanning [{query.from_block}, {to_block}) for {WALLET_ADDRESS}...")
+    started = time.perf_counter()
+    receiver = await client.stream(query, hypersync.StreamConfig())
+    total = 0
+    samples = []
+    while True:
+        res = await receiver.recv()
+        if res is None:
+            break
+        total += len(res.data.transactions)
+        samples.extend(res.data.transactions[: max(0, 3 - len(samples))])
+        print(f"next_block={res.next_block} batch={len(res.data.transactions)} total={total}")
 
-    start_time = time.time()
-    res = await client.get(query)
-    end_time = time.time()
-
-    end_block = res.next_block
-    num_blocks_scanned = end_block - start_block
-    time_taken = end_time - start_time
-
-    print(f"Query completed.")
-    print(f"Started from block: {start_block}")
-    print(f"Scanned up to block: {end_block}")
-    print(f"Number of blocks scanned: {num_blocks_scanned}")
-    print(f"Time taken for the query: {time_taken:.2f} seconds")
-    print(f"Number of transactions fetched: {len(res.data.transactions)}")
+    print(f"Done in {time.perf_counter() - started:.2f}s. transactions={total}")
+    for tx in samples:
+        print(
+            f"sample block={tx.block_number} hash={tx.hash} "
+            f"from={tx.from_} to={tx.to} value_wei={tx.value}"
+        )
 
 asyncio.run(main())

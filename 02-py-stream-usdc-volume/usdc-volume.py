@@ -11,7 +11,12 @@ async def collect_events():
             "Missing ENVIO_API_TOKEN. Get a token at https://docs.envio.dev/docs/HyperSync/api-tokens and export it before running."
         )
 
-    client = hypersync.HypersyncClient(hypersync.ClientConfig(url="https://eth.hypersync.xyz", bearer_token=api_token))
+    client = hypersync.HypersyncClient(
+        hypersync.ClientConfig(
+            url=os.environ.get("HYPERSYNC_URL", "https://eth.hypersync.xyz"),
+            bearer_token=api_token,
+        )
+    )
 
     query = hypersync.Query(
         from_block=18_000_000,
@@ -40,9 +45,10 @@ async def collect_events():
     config = hypersync.StreamConfig(
         hex_output=hypersync.HexOutput.PREFIXED,
         column_mapping=ColumnMapping(
-            # map value columns to float so we can do calculations with them
+            # Keep decoded token amounts as exact integers for downstream calculations.
             decoded_log={
-                "value": DataType.FLOAT64,
+                # USDC values are integers. Float64 can silently lose precision.
+                "value": DataType.UINT64,
             },
         ),
         event_signature="Transfer(address indexed from, address indexed to, uint256 value)",
