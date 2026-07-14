@@ -9,7 +9,7 @@ if (!apiToken) {
 const MAX_HEIGHT_EVENTS = Number(process.env.MAX_HEIGHT_EVENTS || 3);
 
 const client = new HypersyncClient({
-  url: "https://eth.hypersync.xyz",
+  url: process.env.HYPERSYNC_URL || "https://eth.hypersync.xyz",
   apiToken,
 });
 

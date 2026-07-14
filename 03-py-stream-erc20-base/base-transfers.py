@@ -1,5 +1,5 @@
 import hypersync
-from hypersync import LogSelection, LogField, FieldSelection, TransactionField, ColumnMapping, DataType
+from hypersync import FieldSelection, LogField, LogSelection
 import asyncio
 import os
 
@@ -11,7 +11,12 @@ async def collect_events():
             "Missing ENVIO_API_TOKEN. Get a token at https://docs.envio.dev/docs/HyperSync/api-tokens and export it before running."
         )
 
-    client = hypersync.HypersyncClient(hypersync.ClientConfig(url="https://base.hypersync.xyz", bearer_token=api_token))
+    client = hypersync.HypersyncClient(
+        hypersync.ClientConfig(
+            url=os.environ.get("HYPERSYNC_URL", "https://base.hypersync.xyz"),
+            bearer_token=api_token,
+        )
+    )
 
     query = hypersync.Query(
         from_block=10_000_000,
@@ -23,7 +28,7 @@ async def collect_events():
         # Select the fields and tables we want
         field_selection=FieldSelection(
             log=[
-                # Loading only this simple boolean field makes this erquest much faster
+                # Loading one tiny field is enough when the goal is only to count rows.
                 LogField.REMOVED,
             ],
         ),
@@ -34,7 +39,7 @@ async def collect_events():
         concurrency=12,
     )
 
-    await client.collect_parquet("data",query, config)
+    await client.collect_parquet("data", query, config)
 
 
 def main():

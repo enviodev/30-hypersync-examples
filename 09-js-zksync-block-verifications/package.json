@@ -1,10 +1,12 @@
 {
-  "name": "all-uni",
+  "name": "09-js-zksync-block-verifications",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "private": true,
+  "main": "block-verifications.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node block-verifications.js",
+    "check": "node --check block-verifications.js"
   },
   "keywords": [],
   "author": "",

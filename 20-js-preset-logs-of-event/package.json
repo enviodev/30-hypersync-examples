@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "start": "node main.js",
+    "check": "node --check main.js"
+  },
   "dependencies": {
-    "@envio-dev/hypersync-client": "^1.4.0",
-    "viem": "^2.9.6"
+    "@envio-dev/hypersync-client": "^1.4.0"
   }
 }

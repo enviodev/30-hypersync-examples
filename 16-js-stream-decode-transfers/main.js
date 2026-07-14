@@ -12,7 +12,7 @@ const TRANSFER =
   "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
 const client = new HypersyncClient({
-  url: "https://eth.hypersync.xyz",
+  url: process.env.HYPERSYNC_URL || "https://eth.hypersync.xyz",
   apiToken,
 });
 
@@ -21,8 +21,10 @@ const decoder = Decoder.fromSignatures([
 ]);
 
 const height = await client.getHeight();
-let query = {
-  fromBlock: Math.max(0, height - 1500),
+const safeHeight = Math.max(0, height - Number(process.env.CONFIRMATIONS || 12));
+const query = {
+  fromBlock: Math.max(0, safeHeight - 1500),
+  toBlock: safeHeight,
   logs: [{ address: [USDC], topics: [[TRANSFER]] }],
   fieldSelection: {
     log: ["Address", "Data", "Topic0", "Topic1", "Topic2", "BlockNumber"],
@@ -45,12 +47,18 @@ while (count < MAX_EVENTS) {
     if (!d) continue;
     const from = d.indexed[0]?.val?.toString?.() ?? "?";
     const to = d.indexed[1]?.val?.toString?.() ?? "?";
-    const value = d.body[0]?.val?.toString?.() ?? "0";
-    console.log(`Transfer ${from} -> ${to} value=${value}`);
+    const value = BigInt(d.body[0]?.val?.toString?.() ?? "0");
+    console.log(`USDC ${from} -> ${to} amount=${formatUnits(value, 6)}`);
     count += 1;
   }
-  query.fromBlock = res.nextBlock;
 }
 
 await stream.close?.();
 console.log(`Done. decoded=${count}`);
+
+function formatUnits(value, decimals) {
+  const scale = 10n ** BigInt(decimals);
+  const whole = value / scale;
+  const fraction = (value % scale).toString().padStart(decimals, "0");
+  return `${whole}.${fraction}`;
+}

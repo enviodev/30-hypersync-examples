@@ -15,7 +15,7 @@ if (!apiToken) {
 async function main() {
   // Create hypersync client using the mainnet hypersync endpoint
   const client = new HypersyncClient({
-    url: "https://eth.hypersync.xyz",
+    url: process.env.HYPERSYNC_URL || "https://eth.hypersync.xyz",
     apiToken: apiToken,
   });
 
@@ -62,7 +62,8 @@ async function main() {
     hexOutput: HexOutput.Prefixed,
     columnMapping: {
       decodedLog: {
-        value: DataType.Float64,
+        // USDT values are integers. Float64 can silently lose precision.
+        value: DataType.UInt64,
       },
     },
     eventSignature:

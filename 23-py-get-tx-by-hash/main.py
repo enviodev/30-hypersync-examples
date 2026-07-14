@@ -18,7 +18,10 @@ async def main():
     )
 
     client = hypersync.HypersyncClient(
-        hypersync.ClientConfig(url="https://eth.hypersync.xyz", bearer_token=api_token)
+        hypersync.ClientConfig(
+            url=os.environ.get("HYPERSYNC_URL", "https://eth.hypersync.xyz"),
+            bearer_token=api_token,
+        )
     )
 
     query = hypersync.Query(

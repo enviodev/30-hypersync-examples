@@ -16,9 +16,11 @@ async fn main() -> Result<()> {
         .ok()
         .and_then(|v| v.parse().ok())
         .unwrap_or(3);
+    let hypersync_url =
+        env::var("HYPERSYNC_URL").unwrap_or_else(|_| "https://eth.hypersync.xyz".into());
 
     let client = Client::builder()
-        .url("https://eth.hypersync.xyz")
+        .url(hypersync_url)
         .api_token(api_token)
         .build()?;
 
@@ -27,10 +29,12 @@ async fn main() -> Result<()> {
     let transfer = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
     let height = client.get_height().await?;
-    let from_block = height.saturating_sub(5_000);
+    let safe_height = height.saturating_sub(12);
+    let from_block = safe_height.saturating_sub(5_000);
 
     let query = Query::new()
         .from_block(from_block)
+        .to_block_excl(safe_height)
         .where_logs(
             LogFilter::all()
                 .and_topic0([transfer])?
@@ -64,8 +68,8 @@ async fn main() -> Result<()> {
     while batches < max_batches {
         match receiver.recv().await {
             Some(Ok(res)) => {
-                let logs = res.data.logs.len();
-                let txs = res.data.transactions.len();
+                let logs: usize = res.data.logs.iter().map(Vec::len).sum();
+                let txs: usize = res.data.transactions.iter().map(Vec::len).sum();
                 println!(
                     "batch={} next_block={} logs={} txs={}",
                     batches + 1,

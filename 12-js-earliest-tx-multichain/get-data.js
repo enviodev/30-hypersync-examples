@@ -13,7 +13,18 @@ if (!apiToken) {
 }
 
 // Replace with the wallet address you want to check
-const TARGET_ADDRESS = "0xBEa9f7FD27f4EE20066F18DEF0bc586eC221055A";
+const TARGET_ADDRESS = (
+  process.argv[2] ||
+  process.env.WALLET_ADDRESS ||
+  "0xBEa9f7FD27f4EE20066F18DEF0bc586eC221055A"
+).toLowerCase();
+if (!/^0x[a-f0-9]{40}$/.test(TARGET_ADDRESS)) {
+  throw new Error(`Invalid wallet address: ${TARGET_ADDRESS}`);
+}
+const CONCURRENCY = Math.max(1, Number(process.env.CONCURRENCY || 3));
+if (!Number.isFinite(CONCURRENCY)) {
+  throw new Error("CONCURRENCY must be a positive number");
+}
 
 // Top chains to query
 const CHAINS = [
@@ -68,9 +79,11 @@ async function queryChain(chain) {
       apiToken: apiToken,
     });
 
-    // Create query
-    let query = {
+    const height = await client.getHeight();
+    const toBlock = Math.max(0, height - Number(process.env.CONFIRMATIONS || 12));
+    const query = {
       fromBlock: 0,
+      toBlock,
       transactions: [{ from: [TARGET_ADDRESS] }, { to: [TARGET_ADDRESS] }],
       fieldSelection: {
         block: [BlockField.Number, BlockField.Timestamp],
@@ -81,12 +94,13 @@ async function queryChain(chain) {
 
     // Start streaming blocks
     const stream = await client.stream(query, {});
-
-    // We only need the first result
-    const res = await stream.recv();
-
-    // Close the stream
-    await stream.close();
+    let res;
+    try {
+      // We only need the first result.
+      res = await stream.recv();
+    } finally {
+      await stream.close();
+    }
 
     // Handle no results
     if (
@@ -129,8 +143,7 @@ const main = async () => {
   );
 
   try {
-    // Query all chains in parallel
-    const results = await Promise.all(CHAINS.map((chain) => queryChain(chain)));
+    const results = await mapWithConcurrency(CHAINS, CONCURRENCY, queryChain);
 
     // Display results
     console.log("\n===== Results =====\n");
@@ -159,6 +172,22 @@ const main = async () => {
     console.error("Error executing queries:", error);
   }
 };
+
+async function mapWithConcurrency(items, concurrency, worker) {
+  const results = new Array(items.length);
+  let next = 0;
+  async function run() {
+    while (true) {
+      const index = next++;
+      if (index >= items.length) return;
+      results[index] = await worker(items[index]);
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, items.length) }, () => run())
+  );
+  return results;
+}
 
 main().catch((error) => {
   console.error("Error:", error);
