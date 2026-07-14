@@ -1,0 +1,16 @@
+{
+  "name": "40-js-failed-transaction-hotspots",
+  "version": "1.0.0",
+  "description": "Rank failed transaction targets with HyperSync",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "check": "node --check main.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@envio-dev/hypersync-client": "^1.4.0"
+  },
+  "type": "module"
+}

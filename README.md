@@ -1,8 +1,8 @@
-# 30 HyperSync examples
+# 40 HyperSync examples
 
-Thirty runnable examples that move from a first query to production-minded blockchain data pipelines in Python, JavaScript/TypeScript, Rust, and raw HTTP.
+Forty runnable examples that move from a first query to production-minded blockchain data pipelines in Python, JavaScript/TypeScript, Rust, and raw HTTP.
 
-These examples are organized around outcomes: discover pools, build a wallet statement, inspect internal ETH transfers, compare join modes, write exact token data to Parquet, and understand safe pagination and checkpointing.
+These examples are organized around outcomes: discover pools and NFT mints, build wallet and stablecoin statements, investigate liquidations and failed transactions, monitor upgrades and governance, inspect bridges and account abstraction, and understand safe pagination and checkpointing.
 
 ## The five-minute path
 
@@ -13,6 +13,14 @@ New to HyperSync? Run these in order:
 3. [`16-js-stream-decode-transfers`](16-js-stream-decode-transfers) — stream and decode an event.
 4. [`26-js-stream-join-transactions`](26-js-stream-join-transactions) — attach transaction context to matching logs.
 5. [`14-py-stream-logs-progress`](14-py-stream-logs-progress) — checkpoint a paginated scan and detect reorg boundaries.
+
+## Pick a real project
+
+- **Activity feeds:** follow [NFT mints](31-js-nft-mint-radar), [Aave liquidations](34-js-aave-liquidations), or [ENS registrations](39-js-ens-registrations).
+- **Protocol analytics:** measure [stablecoin supply flows](32-py-stablecoin-supply-flows), [account-abstraction operations](33-js-account-abstraction-ops), or [OP bridge deposits](37-js-op-bridge-deposits).
+- **Security and operations:** monitor [proxy upgrades](35-js-proxy-upgrade-monitor) or rank [failed-transaction hotspots](40-js-failed-transaction-hotspots).
+- **Governance intelligence:** discover [cross-DAO proposals](36-js-governance-proposals) and their voting windows.
+- **MEV research:** combine joins and log ordering to identify [sandwich candidates](38-js-sandwich-candidates).
 
 ## Prerequisites
 
@@ -38,15 +46,15 @@ See the [supported networks](https://docs.envio.dev/docs/HyperSync/hypersync-sup
 
 ### Start — understand the query model
 
-Examples 01, 05, 07, 13, 20, 23, and 28 cover presets, pagination, field selection, height streams, and lookups.
+Examples 01, 05, 07, 13, 20, 23, 28, and 31 cover presets, pagination, field selection, height streams, lookups, and interface-level event discovery.
 
 ### Build — turn data into an answer
 
-Examples 02, 06, 08–12, 16–18, 21, 22, 24–27, and 29 decode and aggregate real protocol, wallet, deployment, trace, and multichain data.
+Examples 02, 06, 08–12, 16–18, 21, 22, 24–27, 29, 32–34, and 36–39 decode and aggregate real protocol, wallet, deployment, trace, governance, bridge, MEV, and multichain data.
 
 ### Ship — use safe and scalable patterns
 
-Examples 03–05, 14, 15, 17–19, and 30 cover snapshots, checkpointing, Parquet, language parity, and stream tuning.
+Examples 03–05, 14, 15, 17–19, 30, 35, and 40 cover snapshots, checkpointing, Parquet, language parity, stream tuning, and operational monitoring.
 
 ## Catalog
 
@@ -82,6 +90,16 @@ Examples 03–05, 14, 15, 17–19, and 30 cover snapshots, checkpointing, Parque
 | 28 | [`field-selection`](28-curl-blocks-field-selection) | curl | Starter | Seconds | Payload cost of broad fields | Byte comparison |
 | 29 | [`multi-wallet-erc20`](29-js-stream-multi-wallet-erc20) | JavaScript | Builder | <1 min | OR filters across wallet topics | Per-wallet directions |
 | 30 | [`stream-config-tuning`](30-py-stream-config-tuning) | Python | Advanced | 1–3 min | Reproducible default-vs-tuned benchmark | Throughput table |
+| 31 | [`nft-mint-radar`](31-js-nft-mint-radar) | JavaScript | Builder | <1 min | Interface discovery + ERC-721 topic shape | Collection mint feed |
+| 32 | [`stablecoin-supply-flows`](32-py-stablecoin-supply-flows) | Python | Builder | <1 min | Zero-address filters + exact supply math | Minted, burned, and net USDC |
+| 33 | [`account-abstraction-ops`](33-js-account-abstraction-ops) | JavaScript | Advanced | <1 min | Multi-version decoding + paymaster analytics | User-operation summary |
+| 34 | [`aave-liquidations`](34-js-aave-liquidations) | JavaScript | Advanced | <1 min | Protocol-scoped risk-event decoding | Liquidation dashboard |
+| 35 | [`proxy-upgrade-monitor`](35-js-proxy-upgrade-monitor) | JavaScript | Builder | <1 min | Interface-wide security monitoring | Proxy implementation changes |
+| 36 | [`governance-proposals`](36-js-governance-proposals) | JavaScript | Advanced | 1–3 min | Dynamic ABI arrays + proposal metadata | Cross-DAO proposal feed |
+| 37 | [`op-bridge-deposits`](37-js-op-bridge-deposits) | JavaScript | Advanced | <1 min | Bridge events + opaque payloads | OP deposit feed |
+| 38 | [`sandwich-candidates`](38-js-sandwich-candidates) | JavaScript | Advanced | <1 min | Joins + ordered MEV heuristics | Candidate transaction triples |
+| 39 | [`ens-registrations`](39-js-ens-registrations) | JavaScript | Builder | <1 min | Dynamic strings + timestamp presentation | ENS registration feed |
+| 40 | [`failed-transaction-hotspots`](40-js-failed-transaction-hotspots) | JavaScript | Builder | <1 min | Match-all transactions + failure grouping | Contract/selector hotspots |
 
 Run times are rough and depend on the selected chain, range, connection, and rate limits. Defaults intentionally use bounded or confirmed ranges.
 
